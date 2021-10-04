@@ -1,34 +1,51 @@
-cmake_minimum_required(VERSION 2.8.3)
+#  ----------------------------------------------------------------------------
+#  2021 Bernd Pfrommer bernd.pfrommer@gmail.com
+#
+
+cmake_minimum_required(VERSION 3.5)
 project(dvs_msgs)
 
-# search for everything we need to build the messages, dont forget the message_generation
-find_package(catkin REQUIRED COMPONENTS
-  message_generation
-  std_msgs
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# set default for build type
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE RelWithDebInfo)
+endif()
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(builtin_interfaces REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(std_msgs REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  msg/EventArray.msg
+  msg/Event.msg
+  DEPENDENCIES builtin_interfaces std_msgs
+  ADD_LINTER_TESTS)
+
+
+if(BUILD_TESTING)
+  find_package(ament_cmake REQUIRED)
+  find_package(ament_cmake_copyright REQUIRED)
+  find_package(ament_cmake_lint_cmake REQUIRED)
+  find_package(ament_cmake_xmllint REQUIRED)
+
+  ament_copyright()
+  ament_lint_cmake()
+  ament_xmllint()
+endif()
+
+install(
+  FILES dvs_msgs_mapping_rule.yaml
+  DESTINATION share/${PROJECT_NAME}
 )
+ament_export_dependencies(rosidl_default_runtime)
 
-# search for all msg files
-FILE(GLOB messages_to_build RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/msg"
-    "${CMAKE_CURRENT_SOURCE_DIR}/msg/*.msg")
-
-# notify catkin to look at the previously found msg files
-add_message_files(
-  FILES
-  ${messages_to_build}
-)
-
-# build the header files from the msg files, and notify catkin about the dependencies
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
-
-# export the dependencis of this package for who ever depends on us
-catkin_package(
-  CATKIN_DEPENDS message_runtime std_msgs
-)
-
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
-
+ament_package()

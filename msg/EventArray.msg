@@ -1,11 +1,9 @@
-# This message contains an array of events
-# (0, 0) is at top-left corner of image
-#
+# Array of events
 
-Header header
+# header and image image geometry
+std_msgs/Header header
+uint32 height
+uint32 width
 
-uint32 height         # image height, that is, number of rows
-uint32 width          # image width, that is, number of columns
-
-# an array of events
+# the actual array of events. For definition of events, see Event.msg
 Event[] events
