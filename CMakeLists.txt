@@ -1,34 +1,32 @@
-cmake_minimum_required(VERSION 2.8.3)
+#
+# Copyright 2021 Bernd Pfrommer <bernd.pfrommer@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cmake_minimum_required(VERSION 3.5)
 project(dvs_msgs)
 
-# search for everything we need to build the messages, dont forget the message_generation
-find_package(catkin REQUIRED COMPONENTS
-  message_generation
-  std_msgs
-)
-
-# search for all msg files
-FILE(GLOB messages_to_build RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/msg"
-    "${CMAKE_CURRENT_SOURCE_DIR}/msg/*.msg")
-
-# notify catkin to look at the previously found msg files
-add_message_files(
-  FILES
-  ${messages_to_build}
-)
-
-# build the header files from the msg files, and notify catkin about the dependencies
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
-
-# export the dependencis of this package for who ever depends on us
-catkin_package(
-  CATKIN_DEPENDS message_runtime std_msgs
-)
-
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
-
+if(DEFINED ENV{ROS_VERSION})
+  if($ENV{ROS_VERSION} EQUAL "2")
+    # to avoid cmake warning: "Manually-specified variables were not used by the project"
+    unset(CATKIN_INSTALL_INTO_PREFIX_ROOT)
+    unset(CATKIN_SYMLINK_INSTALL)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CMakeListsROS2.txt)
+  elseif($ENV{ROS_VERSION} EQUAL "1")
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CMakeListsROS1.txt)
+  else()
+    message(ERROR "invalid ROS_VERSION environment variable: $ENV{ROS_VERSION}")
+  endif()
+else()
+  message(ERROR "ROS_VERSION environment variable is not set!")
+endif()
